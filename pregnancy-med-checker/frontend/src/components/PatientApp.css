@@ -26,6 +26,12 @@
   gap: 1.5rem;
 }
 
+.patient-loading-hint {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #666;
+}
+
 .loading-spinner-large {
   width: 60px;
   height: 60px;
@@ -36,8 +42,12 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .error-container {
@@ -86,7 +96,9 @@
   background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
   border-radius: 12px;
   border: 2px solid #e0e0e0;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
 }
 
 .summary-card:hover {
@@ -423,4 +435,3 @@
   font-size: 0.9rem;
   color: #667eea;
 }
-

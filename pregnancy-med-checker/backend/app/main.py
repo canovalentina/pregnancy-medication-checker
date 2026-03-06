@@ -28,6 +28,10 @@ from app.notes import router as notes_router
 from app.openfda import router as openfda_router
 from app.pubmed import router as pubmed_router
 from app.rxnorm import router as rxnorm_router
+from services.fhir_integration import DEFAULT_TEST_DATA_PATH
+
+# In-memory store for demo patient IDs from startup ingest (see app/demo_patients.py)
+from app.demo_patients import set_demo_patient_ids
 
 # Configuration
 APP_NAME = os.getenv("APP_NAME", "Pregnancy Medication Checker API")
@@ -93,6 +97,34 @@ async def startup_event():
     fhir_test_task = asyncio.create_task(test_fhir_connection())
     # Keep task reference alive (task runs in background)
     logger.debug(f"Started background FHIR connection test task: {fhir_test_task}")
+
+    # Optional: ingest demo (test) data at startup when INGEST_DEMO_AT_STARTUP is set
+    if os.getenv("INGEST_DEMO_AT_STARTUP", "").lower() in ("true", "1", "yes"):
+
+        async def ensure_demo_data():
+            try:
+                resp = await fhir_handlers.get_ingested_patient_ids()
+                count = (resp.data or {}).get("count", 0)
+                if count >= 3:
+                    logger.info(
+                        f"Demo patients already present ({count} ingested), skipping startup ingest"
+                    )
+                    return
+                logger.info("Ingesting demo data at startup...")
+                result = await fhir_handlers.ingest_resource_data(
+                    data_path=str(DEFAULT_TEST_DATA_PATH),
+                    max_bundles=None,
+                    ingestion_tag=None,
+                )
+                ids = [p.id for p in (result.patients_created or []) if p.id]
+                if ids:
+                    set_demo_patient_ids(ids)
+                    logger.info(f"Stored {len(ids)} demo patient IDs from startup ingest.")
+                logger.info("Demo data ingestion at startup complete.")
+            except Exception as e:
+                logger.warning(f"Demo ingest at startup failed: {e}")
+
+        asyncio.create_task(ensure_demo_data())
 
 
 @app.on_event("shutdown")
@@ -174,12 +206,12 @@ def get_test_accounts():
             "username": "provider",
             "password": "provider123",
             "role": "provider",
-            "full_name": "Dr. Sarah Johnson",
+            "full_name": "Dr. Sarah Johnsonx",
         },
         "patient": {
             "username": "patient",
             "password": "patient123",
             "role": "patient",
-            "full_name": "Jane Doe",
+            "full_name": "Jane Doex",
         },
     }

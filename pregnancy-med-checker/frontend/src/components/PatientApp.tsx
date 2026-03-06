@@ -17,7 +17,15 @@ export function PatientApp() {
   const [summary, setSummary] = useState<PatientSummary | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'overview' | 'medications' | 'observations' | 'conditions' | 'diet' | 'notes' | 'messages'>('overview');
+  const [activeTab, setActiveTab] = useState<
+    | 'overview'
+    | 'medications'
+    | 'observations'
+    | 'conditions'
+    | 'diet'
+    | 'notes'
+    | 'messages'
+  >('overview');
   const [unreadMessageCount, setUnreadMessageCount] = useState(0);
 
   // Try to find patient record on mount using their name
@@ -58,7 +66,8 @@ export function PatientApp() {
       // Helper function to check if a patient has pregnancy data
       const patientHasPregnancyData = (summary: PatientSummary): boolean => {
         return (
-          (summary.pregnancyHistory?.pregnancies && summary.pregnancyHistory.pregnancies.length > 0) ||
+          (summary.pregnancyHistory?.pregnancies &&
+            summary.pregnancyHistory.pregnancies.length > 0) ||
           (summary.observations && summary.observations.length > 0) ||
           (summary.medications && summary.medications.length > 0) ||
           (summary.conditions && summary.conditions.length > 0)
@@ -66,92 +75,156 @@ export function PatientApp() {
       };
 
       // Helper function to find exact name match
-      const findExactNameMatch = (patients: Patient[], fullName: string): Patient | null => {
+      const findExactNameMatch = (
+        patients: Patient[],
+        fullName: string,
+      ): Patient | null => {
         const normalizedFullName = fullName.toLowerCase().trim();
-        return patients.find(p => {
-          const patientName = (p.name || '').toLowerCase().trim();
-          return patientName === normalizedFullName;
-        }) || null;
+        return (
+          patients.find(p => {
+            const patientName = (p.name || '').toLowerCase().trim();
+            return patientName === normalizedFullName;
+          }) || null
+        );
       };
 
       // Search for patient by exact name match first (only ingested patients)
-      let searchResponse = await searchPatients({ 
+      let searchResponse = await searchPatients({
         name: user.full_name,
-        only_ingested_patients: true 
+        only_ingested_patients: true,
       });
-      
-      console.log('Search results (only_ingested_patients=true):', searchResponse);
-      
+
+      console.log(
+        'Search results (only_ingested_patients=true):',
+        searchResponse,
+      );
+
       let foundPatient: Patient | null = null;
-      
+
       // If we have results, prioritize patients with pregnancy data
-      if (searchResponse.status === 'success' && searchResponse.data.length > 0) {
-        console.log(`Found ${searchResponse.data.length} patient(s) with name "${user.full_name}" (ingested only):`, 
-          searchResponse.data.map(p => ({ id: p.id, name: p.name, birth_date: p.birth_date })));
-        
+      if (
+        searchResponse.status === 'success' &&
+        searchResponse.data.length > 0
+      ) {
+        console.log(
+          `Found ${searchResponse.data.length} patient(s) with name "${user.full_name}" (ingested only):`,
+          searchResponse.data.map(p => ({
+            id: p.id,
+            name: p.name,
+            birth_date: p.birth_date,
+          })),
+        );
+
         // First, try to find exact name match with pregnancy data
-        const exactMatch = findExactNameMatch(searchResponse.data, user.full_name);
+        const exactMatch = findExactNameMatch(
+          searchResponse.data,
+          user.full_name,
+        );
         if (exactMatch) {
           // Check if exact match has pregnancy data
           const summaryResponse = await getPatientSummary(exactMatch.id);
-          if (summaryResponse.status === 'success' && patientHasPregnancyData(summaryResponse.data)) {
+          if (
+            summaryResponse.status === 'success' &&
+            patientHasPregnancyData(summaryResponse.data)
+          ) {
             foundPatient = exactMatch;
-            console.log('Selected exact match with pregnancy data:', { id: exactMatch.id, name: exactMatch.name, birth_date: exactMatch.birth_date });
+            console.log('Selected exact match with pregnancy data:', {
+              id: exactMatch.id,
+              name: exactMatch.name,
+              birth_date: exactMatch.birth_date,
+            });
           } else {
-            console.log('Exact match found but no pregnancy data, checking other patients...');
+            console.log(
+              'Exact match found but no pregnancy data, checking other patients...',
+            );
           }
         }
-        
+
         // If exact match doesn't have data, try all patients to find one with pregnancy data
         if (!foundPatient) {
           for (const candidate of searchResponse.data) {
             // Skip if this is the exact match we already checked
             if (exactMatch && candidate.id === exactMatch.id) continue;
-            
+
             const summaryResponse = await getPatientSummary(candidate.id);
-            if (summaryResponse.status === 'success' && patientHasPregnancyData(summaryResponse.data)) {
+            if (
+              summaryResponse.status === 'success' &&
+              patientHasPregnancyData(summaryResponse.data)
+            ) {
               foundPatient = candidate;
-              console.log('Selected patient with pregnancy data:', { id: candidate.id, name: candidate.name, birth_date: candidate.birth_date });
+              console.log('Selected patient with pregnancy data:', {
+                id: candidate.id,
+                name: candidate.name,
+                birth_date: candidate.birth_date,
+              });
               break;
             }
           }
         }
-        
+
         // If still no patient with data, use exact match or first patient
         if (!foundPatient) {
           if (exactMatch) {
             foundPatient = exactMatch;
-            console.log('Selected exact match (no pregnancy data found in any patient):', { id: exactMatch.id, name: exactMatch.name, birth_date: exactMatch.birth_date });
+            console.log(
+              'Selected exact match (no pregnancy data found in any patient):',
+              {
+                id: exactMatch.id,
+                name: exactMatch.name,
+                birth_date: exactMatch.birth_date,
+              },
+            );
           } else {
             foundPatient = searchResponse.data[0];
-            console.log('Selected first match (no exact match, no pregnancy data):', { id: foundPatient.id, name: foundPatient.name, birth_date: foundPatient.birth_date });
+            console.log(
+              'Selected first match (no exact match, no pregnancy data):',
+              {
+                id: foundPatient.id,
+                name: foundPatient.name,
+                birth_date: foundPatient.birth_date,
+              },
+            );
           }
         }
       }
-      
+
       // If still no results, try searching with just the first name (still only ingested patients)
       if (!foundPatient) {
         const nameParts = user.full_name.trim().split(/\s+/);
         if (nameParts.length > 0) {
-          searchResponse = await searchPatients({ 
-            name: nameParts[0],  // First name
-            gender: 'female',     // More likely to have pregnancy data
-            only_ingested_patients: true 
+          searchResponse = await searchPatients({
+            name: nameParts[0], // First name
+            gender: 'female', // More likely to have pregnancy data
+            only_ingested_patients: true,
           });
-          if (searchResponse.status === 'success' && searchResponse.data.length > 0) {
+          if (
+            searchResponse.status === 'success' &&
+            searchResponse.data.length > 0
+          ) {
             // Try to find exact match first
-            const exactMatch = findExactNameMatch(searchResponse.data, user.full_name);
+            const exactMatch = findExactNameMatch(
+              searchResponse.data,
+              user.full_name,
+            );
             if (exactMatch) {
               // Check if exact match has pregnancy data
               const summaryResponse = await getPatientSummary(exactMatch.id);
-              if (summaryResponse.status === 'success' && patientHasPregnancyData(summaryResponse.data)) {
+              if (
+                summaryResponse.status === 'success' &&
+                patientHasPregnancyData(summaryResponse.data)
+              ) {
                 foundPatient = exactMatch;
               } else {
                 // Try other patients
                 for (const candidate of searchResponse.data) {
                   if (candidate.id === exactMatch.id) continue;
-                  const candidateSummary = await getPatientSummary(candidate.id);
-                  if (candidateSummary.status === 'success' && patientHasPregnancyData(candidateSummary.data)) {
+                  const candidateSummary = await getPatientSummary(
+                    candidate.id,
+                  );
+                  if (
+                    candidateSummary.status === 'success' &&
+                    patientHasPregnancyData(candidateSummary.data)
+                  ) {
                     foundPatient = candidate;
                     break;
                   }
@@ -165,7 +238,10 @@ export function PatientApp() {
               // No exact match, try to find any patient with pregnancy data
               for (const candidate of searchResponse.data) {
                 const candidateSummary = await getPatientSummary(candidate.id);
-                if (candidateSummary.status === 'success' && patientHasPregnancyData(candidateSummary.data)) {
+                if (
+                  candidateSummary.status === 'success' &&
+                  patientHasPregnancyData(candidateSummary.data)
+                ) {
                   foundPatient = candidate;
                   break;
                 }
@@ -178,26 +254,35 @@ export function PatientApp() {
           }
         }
       }
-      
+
       // If still no results, try with just the last name
       if (!foundPatient) {
         const nameParts = user.full_name.trim().split(/\s+/);
         if (nameParts.length > 1) {
-          searchResponse = await searchPatients({ 
-            name: nameParts[nameParts.length - 1],  // Last name
+          searchResponse = await searchPatients({
+            name: nameParts[nameParts.length - 1], // Last name
             gender: 'female',
-            only_ingested_patients: true 
+            only_ingested_patients: true,
           });
-          if (searchResponse.status === 'success' && searchResponse.data.length > 0) {
+          if (
+            searchResponse.status === 'success' &&
+            searchResponse.data.length > 0
+          ) {
             // Try to find exact match first
-            const exactMatch = findExactNameMatch(searchResponse.data, user.full_name);
+            const exactMatch = findExactNameMatch(
+              searchResponse.data,
+              user.full_name,
+            );
             if (exactMatch) {
               foundPatient = exactMatch;
             } else {
               // If multiple patients match, try to find one with pregnancy data
               for (const candidate of searchResponse.data) {
                 const summaryResponse = await getPatientSummary(candidate.id);
-                if (summaryResponse.status === 'success' && patientHasPregnancyData(summaryResponse.data)) {
+                if (
+                  summaryResponse.status === 'success' &&
+                  patientHasPregnancyData(summaryResponse.data)
+                ) {
                   foundPatient = candidate;
                   setPatient(candidate);
                   setSummary(summaryResponse.data);
@@ -211,15 +296,15 @@ export function PatientApp() {
           }
         }
       }
-      
+
       if (foundPatient) {
         console.log('Found patient:', {
           id: foundPatient.id,
           name: foundPatient.name,
           birth_date: foundPatient.birth_date,
-          gender: foundPatient.gender
+          gender: foundPatient.gender,
         });
-        
+
         // Verify this is a reasonable patient (not a child)
         if (foundPatient.birth_date) {
           try {
@@ -227,24 +312,40 @@ export function PatientApp() {
             const today = new Date();
             let age = today.getFullYear() - birth.getFullYear();
             const monthDiff = today.getMonth() - birth.getMonth();
-            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+            if (
+              monthDiff < 0 ||
+              (monthDiff === 0 && today.getDate() < birth.getDate())
+            ) {
               age--;
             }
             if (age < 13) {
-              console.warn(`Patient ${foundPatient.id} has unrealistic age ${age} years. Skipping.`);
+              console.warn(
+                `Patient ${foundPatient.id} has unrealistic age ${age} years. Skipping.`,
+              );
               // Try to find another patient with pregnancy data
-              if (searchResponse.status === 'success' && searchResponse.data.length > 1) {
+              if (
+                searchResponse.status === 'success' &&
+                searchResponse.data.length > 1
+              ) {
                 for (const candidate of searchResponse.data.slice(1)) {
                   if (candidate.birth_date) {
                     try {
                       const candidateBirth = new Date(candidate.birth_date);
-                      let candidateAge = today.getFullYear() - candidateBirth.getFullYear();
-                      const candidateMonthDiff = today.getMonth() - candidateBirth.getMonth();
-                      if (candidateMonthDiff < 0 || (candidateMonthDiff === 0 && today.getDate() < candidateBirth.getDate())) {
+                      let candidateAge =
+                        today.getFullYear() - candidateBirth.getFullYear();
+                      const candidateMonthDiff =
+                        today.getMonth() - candidateBirth.getMonth();
+                      if (
+                        candidateMonthDiff < 0 ||
+                        (candidateMonthDiff === 0 &&
+                          today.getDate() < candidateBirth.getDate())
+                      ) {
                         candidateAge--;
                       }
                       if (candidateAge >= 13) {
-                        console.log(`Trying alternative patient: ${candidate.id} (age ${candidateAge})`);
+                        console.log(
+                          `Trying alternative patient: ${candidate.id} (age ${candidateAge})`,
+                        );
                         foundPatient = candidate;
                         break;
                       }
@@ -259,11 +360,17 @@ export function PatientApp() {
                 const finalBirth = new Date(foundPatient.birth_date);
                 let finalAge = today.getFullYear() - finalBirth.getFullYear();
                 const finalMonthDiff = today.getMonth() - finalBirth.getMonth();
-                if (finalMonthDiff < 0 || (finalMonthDiff === 0 && today.getDate() < finalBirth.getDate())) {
+                if (
+                  finalMonthDiff < 0 ||
+                  (finalMonthDiff === 0 &&
+                    today.getDate() < finalBirth.getDate())
+                ) {
                   finalAge--;
                 }
                 if (finalAge < 13) {
-                  setError(`Found patient record but age appears incorrect. Please contact your provider.`);
+                  setError(
+                    `Found patient record but age appears incorrect. Please contact your provider.`,
+                  );
                   setLoading(false);
                   return;
                 }
@@ -273,28 +380,30 @@ export function PatientApp() {
             // If date parsing fails, continue anyway
           }
         }
-        
+
         setPatient(foundPatient);
-        
+
         // Load patient summary
         const summaryResponse = await getPatientSummary(foundPatient.id);
         if (summaryResponse.status === 'success') {
           setSummary(summaryResponse.data);
-          
+
           // Verify patient has data - if not, show helpful message
           if (!patientHasPregnancyData(summaryResponse.data)) {
             setError(
               `Found patient record for ${foundPatient.name}, ` +
-              `but no pregnancy observations, medications, or conditions are available. ` +
-              `Please contact your provider to ensure your records are up to date.`
+                `but no pregnancy observations, medications, or conditions are available. ` +
+                `Please contact your provider to ensure your records are up to date.`,
             );
           }
         }
       } else {
-        setError('Could not find your patient record. Please contact your provider.');
+        setError('Could not find your patient record.');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load patient record');
+      setError(
+        err instanceof Error ? err.message : 'Failed to load patient record',
+      );
     } finally {
       setLoading(false);
     }
@@ -320,7 +429,10 @@ export function PatientApp() {
       const today = new Date();
       let age = today.getFullYear() - birth.getFullYear();
       const monthDiff = today.getMonth() - birth.getMonth();
-      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      if (
+        monthDiff < 0 ||
+        (monthDiff === 0 && today.getDate() < birth.getDate())
+      ) {
         age--;
       }
       return age;
@@ -335,7 +447,10 @@ export function PatientApp() {
         <div className="main-content">
           <div className="patient-loading">
             <div className="loading-spinner-large" />
-            <p>Loading your patient information...</p>
+            <p>Your record is being loaded.</p>
+            <p className="patient-loading-hint">
+              Demo data may take a moment on first load.
+            </p>
           </div>
         </div>
       </div>
@@ -371,7 +486,8 @@ export function PatientApp() {
             {patient && (
               <p className="patient-subtitle">
                 {patient.birth_date && age !== null && `Age: ${age} years`}
-                {patient.gender && ` • ${patient.gender.charAt(0).toUpperCase() + patient.gender.slice(1)}`}
+                {patient.gender &&
+                  ` • ${patient.gender.charAt(0).toUpperCase() + patient.gender.slice(1)}`}
               </p>
             )}
           </div>
@@ -385,7 +501,9 @@ export function PatientApp() {
                 <div className="summary-card-icon">💊</div>
                 <div className="summary-card-content">
                   <h4>My Medications</h4>
-                  <p className="summary-count">{summary?.medications.length || 0}</p>
+                  <p className="summary-count">
+                    {summary?.medications.length || 0}
+                  </p>
                   <p className="summary-label">Active medications</p>
                 </div>
               </div>
@@ -393,7 +511,9 @@ export function PatientApp() {
                 <div className="summary-card-icon">🤰</div>
                 <div className="summary-card-content">
                   <h4>Pregnancy Data</h4>
-                  <p className="summary-count">{summary?.observations.length || 0}</p>
+                  <p className="summary-count">
+                    {summary?.observations.length || 0}
+                  </p>
                   <p className="summary-label">Observations</p>
                 </div>
               </div>
@@ -401,7 +521,9 @@ export function PatientApp() {
                 <div className="summary-card-icon">🏥</div>
                 <div className="summary-card-content">
                   <h4>Conditions</h4>
-                  <p className="summary-count">{summary?.conditions.length || 0}</p>
+                  <p className="summary-count">
+                    {summary?.conditions.length || 0}
+                  </p>
                   <p className="summary-label">Diagnosed conditions</p>
                 </div>
               </div>
@@ -451,7 +573,9 @@ export function PatientApp() {
               >
                 Messages
                 {unreadMessageCount > 0 && (
-                  <span className="unread-count-badge">{unreadMessageCount}</span>
+                  <span className="unread-count-badge">
+                    {unreadMessageCount}
+                  </span>
                 )}
               </button>
             </div>
@@ -479,7 +603,8 @@ export function PatientApp() {
                         <label>Gender</label>
                         <div>
                           {patient.gender
-                            ? patient.gender.charAt(0).toUpperCase() + patient.gender.slice(1)
+                            ? patient.gender.charAt(0).toUpperCase() +
+                              patient.gender.slice(1)
                             : 'N/A'}
                         </div>
                       </div>
@@ -499,7 +624,9 @@ export function PatientApp() {
                       >
                         <div className="quick-action-icon">📋</div>
                         <h4>View Medications</h4>
-                        <p>See your current medications and safety information</p>
+                        <p>
+                          See your current medications and safety information
+                        </p>
                       </div>
                       <div
                         className="quick-action-card"
@@ -518,7 +645,9 @@ export function PatientApp() {
                 <div className="medications-tab">
                   {summary?.medications && summary.medications.length > 0 && (
                     <>
-                      <MedicationInteractionAlerts medications={summary.medications} />
+                      <MedicationInteractionAlerts
+                        medications={summary.medications}
+                      />
                       <MedicationReminders medications={summary.medications} />
                     </>
                   )}
@@ -534,18 +663,20 @@ export function PatientApp() {
               {activeTab === 'observations' && (
                 <div className="observations-tab">
                   <h3>Pregnancy-Related Observations</h3>
-                  
+
                   {/* Pregnancy Visualization Component */}
                   {summary && (
                     <div style={{ marginBottom: '2rem' }}>
                       <PregnancyVisualization summary={summary} />
                     </div>
                   )}
-                  
+
                   {/* Detailed Observations List */}
                   {summary?.observations && summary.observations.length > 0 ? (
                     <div className="observations-list">
-                      <h4 style={{ marginBottom: '1rem', color: '#666' }}>Detailed Observations</h4>
+                      <h4 style={{ marginBottom: '1rem', color: '#666' }}>
+                        Detailed Observations
+                      </h4>
                       {summary.observations.map((obs, index) => {
                         const observationName =
                           obs.code?.text ||
@@ -559,7 +690,10 @@ export function PatientApp() {
                         const unit = obs.valueQuantity?.unit || '';
 
                         return (
-                          <div key={obs.id || index} className="observation-item">
+                          <div
+                            key={obs.id || index}
+                            className="observation-item"
+                          >
                             <div className="observation-header">
                               <h4>{observationName}</h4>
                               <span className="observation-value">
@@ -569,7 +703,8 @@ export function PatientApp() {
                             <div className="observation-details">
                               {obs.effectiveDateTime && (
                                 <div>
-                                  <strong>Date:</strong> {formatDate(obs.effectiveDateTime)}
+                                  <strong>Date:</strong>{' '}
+                                  {formatDate(obs.effectiveDateTime)}
                                 </div>
                               )}
                               {obs.status && (
@@ -601,18 +736,25 @@ export function PatientApp() {
                           condition.code?.coding?.[0]?.display ||
                           `Condition ${index + 1}`;
                         const status =
-                          condition.clinicalStatus?.coding?.[0]?.code || 'unknown';
+                          condition.clinicalStatus?.coding?.[0]?.code ||
+                          'unknown';
 
                         return (
-                          <div key={condition.id || index} className="condition-item">
+                          <div
+                            key={condition.id || index}
+                            className="condition-item"
+                          >
                             <div className="condition-header">
                               <h4>{conditionName}</h4>
-                              <span className={`status-badge status-${status}`}>{status}</span>
+                              <span className={`status-badge status-${status}`}>
+                                {status}
+                              </span>
                             </div>
                             <div className="condition-details">
                               {condition.onsetDateTime && (
                                 <div>
-                                  <strong>Onset:</strong> {formatDate(condition.onsetDateTime)}
+                                  <strong>Onset:</strong>{' '}
+                                  {formatDate(condition.onsetDateTime)}
                                 </div>
                               )}
                             </div>
@@ -621,7 +763,9 @@ export function PatientApp() {
                       })}
                     </div>
                   ) : (
-                    <div className="empty-state">No conditions found in your record.</div>
+                    <div className="empty-state">
+                      No conditions found in your record.
+                    </div>
                   )}
                 </div>
               )}
@@ -630,14 +774,16 @@ export function PatientApp() {
                 <div className="diet-tab">
                   <h3>Diet & Food Interactions</h3>
                   <p style={{ marginBottom: '1.5rem', color: '#666' }}>
-                    This section shows foods that may interact with your medications. 
-                    Please avoid consuming these foods while taking the listed medications.
+                    This section shows foods that may interact with your
+                    medications. Please avoid consuming these foods while taking
+                    the listed medications.
                   </p>
                   {summary?.medications && summary.medications.length > 0 ? (
                     <FoodInteractionAlerts medications={summary.medications} />
                   ) : (
                     <div className="empty-state">
-                      No medications found. Food interactions will be displayed here when you have medications.
+                      No medications found. Food interactions will be displayed
+                      here when you have medications.
                     </div>
                   )}
                 </div>
@@ -657,7 +803,6 @@ export function PatientApp() {
             </div>
           </>
         )}
-
       </div>
     </div>
   );

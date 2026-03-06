@@ -61,8 +61,14 @@ test_*.py
 **/drugbank_integration/data/drugbank_interactions_sample.csv
 # Note: drugbank_interactions.csv is NOT excluded, so it will be included in Docker if present
 
-# Synthea
-**/synthea/
+# Synthea output and large/generated dirs (keep test bundles for startup ingest)
+**/synthea/output/
+**/synthea/modules/
+**/synthea/modules_to_use/
+**/synthea/my_modules/
+**/synthea/my_edited_modules/
+**/synthea/tmp/
+# Do NOT exclude **/synthea/test/ - needed for INGEST_DEMO_AT_STARTUP
 
 # JAR and ZIP files
 *.jar

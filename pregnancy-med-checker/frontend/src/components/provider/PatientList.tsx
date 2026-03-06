@@ -8,6 +8,7 @@ interface PatientListProps {
   title?: string;
   emptyMessage?: string;
   loading?: boolean;
+  loadingMessage?: string;
   compact?: boolean;
   itemsPerPage?: number;
 }
@@ -18,6 +19,7 @@ export function PatientList({
   title = 'Patients',
   emptyMessage = 'No patients found.',
   loading = false,
+  loadingMessage = 'Loading patients...',
   compact = false,
   itemsPerPage = 5,
 }: PatientListProps) {
@@ -71,7 +73,10 @@ export function PatientList({
       const today = new Date();
       let age = today.getFullYear() - birth.getFullYear();
       const monthDiff = today.getMonth() - birth.getMonth();
-      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      if (
+        monthDiff < 0 ||
+        (monthDiff === 0 && today.getDate() < birth.getDate())
+      ) {
         age--;
       }
       return age;
@@ -86,7 +91,7 @@ export function PatientList({
         {title && <h3 className="patient-list-title">{title}</h3>}
         <div className="patient-list-loading">
           <div className="loading-spinner" />
-          <p>Loading patients...</p>
+          <p>{loadingMessage}</p>
         </div>
       </div>
     );
@@ -110,13 +115,14 @@ export function PatientList({
         <div className="patient-list-header">
           <h3 className="patient-list-title">{title}</h3>
           <span className="patient-count">
-            Showing {startIndex + 1}-{Math.min(endIndex, patients.length)} of {patients.length}
+            Showing {startIndex + 1}-{Math.min(endIndex, patients.length)} of{' '}
+            {patients.length}
           </span>
         </div>
       )}
 
       <div className="patient-list-items">
-        {currentPatients.map((patient) => {
+        {currentPatients.map(patient => {
           const age = calculateAge(patient.birth_date);
           const formattedDate = formatDate(patient.birth_date);
 
@@ -139,7 +145,8 @@ export function PatientList({
                   {patient.gender && (
                     <span className="patient-detail-badge">
                       <span className="detail-icon">⚧</span>
-                      {patient.gender.charAt(0).toUpperCase() + patient.gender.slice(1)}
+                      {patient.gender.charAt(0).toUpperCase() +
+                        patient.gender.slice(1)}
                     </span>
                   )}
                 </div>
@@ -172,9 +179,9 @@ export function PatientList({
           >
             ← Previous
           </button>
-          
+
           <div className="pagination-pages">
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => {
               // Show first page, last page, current page, and pages around current
               const showPage =
                 page === 1 ||
@@ -219,4 +226,3 @@ export function PatientList({
     </div>
   );
 }
-

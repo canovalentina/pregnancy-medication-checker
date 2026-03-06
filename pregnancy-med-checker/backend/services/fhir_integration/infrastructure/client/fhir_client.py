@@ -52,7 +52,7 @@ class FHIRClientService:
         timeout: float = 30.0,
         validate: bool = True,
         verify_ssl: bool | None = None,
-        only_ingested_patients: bool = True,
+        only_ingested_patients: bool = False,
     ):
         self.base_url = base_url or DEFAULT_FHIR_SERVER_URL
         self.timeout = float(os.getenv("FHIR_TIMEOUT", str(timeout)))

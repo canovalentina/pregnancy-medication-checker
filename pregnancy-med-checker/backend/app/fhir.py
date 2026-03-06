@@ -100,8 +100,21 @@ def get_ingestion_status():
 
 @router.get("/ingested-patients")
 async def get_ingested_patients():
-    """Get count and list of IDs for all ingested patients."""
-    return await fhir_handlers.get_ingested_patient_ids()
+    """Get count and list of IDs for demo/assigned patients.
+
+    Uses stored IDs from startup ingest, or name-only search (no identifier/tag filter).
+    """
+    from app.demo_patients import get_demo_patient_ids
+
+    return await fhir_handlers.get_ingested_patient_ids(
+        stored_ids=get_demo_patient_ids(),
+        # Must match last names in synthea/test bundles (x suffix to avoid overlap on public server)
+        fallback_names=[
+            "Sarah Williamsx",
+            "Maria Martinezx",
+            "Jennifer Chenx",
+        ],
+    )
 
 
 @router.delete("/ingested-patients")

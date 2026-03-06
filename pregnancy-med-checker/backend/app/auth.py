@@ -66,15 +66,15 @@ TEST_USERS = {
         "username": "provider",
         "password": "provider123",  # In production, use hashed passwords
         "role": UserRole.PROVIDER,
-        "full_name": "Dr. Sarah Johnson",
-        "email": "sarah.johnson@hospital.com",
+        "full_name": "Dr. Sarah Johnsonx",
+        "email": "sarah.johnsonx@hospital.com",
     },
     "patient": {
         "username": "patient",
         "password": "patient123",
         "role": UserRole.PATIENT,
-        "full_name": "Sarah Williams",  # Test patient with pregnancy data, medications, and conditions (age 29)
-        "email": "sarah.williams@example.com",
+        "full_name": "Sarah Williamsx",  # Test patient with pregnancy data, medications, and conditions (age 29)
+        "email": "sarah.williamsx@example.com",
     },
 }
 

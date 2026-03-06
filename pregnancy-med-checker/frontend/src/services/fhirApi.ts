@@ -117,3 +117,31 @@ export async function getPatientSummary(patientId: string): Promise<APIResponse<
     };
   }
 }
+
+/** Response shape from GET /api/fhir/ingested-patients */
+export interface IngestedPatientsResponse {
+  count: number;
+  patient_ids: string[];
+}
+
+export async function getIngestedPatientIds(): Promise<APIResponse<IngestedPatientsResponse>> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/fhir/ingested-patients`, {
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) {
+      return { data: { count: 0, patient_ids: [] }, error: response.statusText, status: 'error' };
+    }
+    const data = await response.json();
+    const payload = data?.data ?? data;
+    const count = payload?.count ?? 0;
+    const patient_ids = Array.isArray(payload?.patient_ids) ? payload.patient_ids : [];
+    return { data: { count, patient_ids }, error: null, status: 'success' };
+  } catch (error) {
+    return {
+      data: { count: 0, patient_ids: [] },
+      error: error instanceof Error ? error.message : 'Unknown error',
+      status: 'error',
+    };
+  }
+}

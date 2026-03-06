@@ -1,21 +1,28 @@
 services:
-
-  hapi-fhir:
-    image: hapiproject/hapi:latest
-    container_name: hapi-fhir
-    ports:
-      - "${HAPI_FHIR_PORT:-8080}:${HAPI_FHIR_PORT:-8080}"
-    volumes:
-      - hapi-data:/data/hapi
-    env_file:
-      - .env
-    environment:
-      - HAPI_FHIR_CORS_ALLOWED_ORIGIN=${ENABLE_CORS_ORIGINS:-http://localhost:5173,https://pregnancy-med-checker.vercel.app,https://www.pregsafe.org}
-    healthcheck:
-      test: ["CMD", "wget", "-q", "-O", "-", "http://localhost:${HAPI_FHIR_PORT:-8080}/fhir/metadata"]
-      interval: 20s
-      timeout: 5s
-      retries: 10
+  # hapi-fhir:
+  #   image: hapiproject/hapi:latest
+  #   container_name: hapi-fhir
+  #   ports:
+  #     - '${HAPI_FHIR_PORT:-8080}:${HAPI_FHIR_PORT:-8080}'
+  #   volumes:
+  #     - hapi-data:/data/hapi
+  #   env_file:
+  #     - .env
+  #   environment:
+  #     - HAPI_FHIR_CORS_ALLOWED_ORIGIN=${ENABLE_CORS_ORIGINS:-http://localhost:5173,https://pregnancy-med-checker.vercel.app,https://www.pregsafe.org}
+  #   healthcheck:
+  #     test:
+  #       [
+  #         'CMD',
+  #         'wget',
+  #         '-q',
+  #         '-O',
+  #         '-',
+  #         'http://localhost:${HAPI_FHIR_PORT:-8080}/fhir/metadata',
+  #       ]
+  #     interval: 20s
+  #     timeout: 5s
+  #     retries: 10
 
   backend:
     build:
@@ -23,7 +30,7 @@ services:
       dockerfile: config/Dockerfile.backend
     container_name: pmc-backend
     ports:
-      - "${BACKEND_PORT:-8000}:${BACKEND_PORT:-8000}"
+      - '${BACKEND_PORT:-8000}:${BACKEND_PORT:-8000}'
     env_file:
       - .env
     environment:
@@ -41,7 +48,7 @@ services:
       dockerfile: config/Dockerfile.frontend
     container_name: pmc-frontend
     ports:
-      - "${FRONTEND_PORT:-5173}:${FRONTEND_PORT:-5173}"
+      - '${FRONTEND_PORT:-5173}:${FRONTEND_PORT:-5173}'
     depends_on:
       - backend
     env_file:
@@ -49,5 +56,5 @@ services:
     environment:
       - DOCKER_ENV=true
 
-volumes:
-  hapi-data:
+# volumes:
+#   hapi-data:

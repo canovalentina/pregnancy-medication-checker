@@ -28,16 +28,19 @@ pregnancy-med-checker/
 ### Getting Started
 
 1. **Clone and navigate to the project:**
+
    ```bash
    cd pregnancy-med-checker
    ```
 
 2. **Create environment file:**
+
    ```bash
    cp .env.example .env
    ```
 
 3. **Start all services:**
+
    ```bash
    make build  # Build Docker images
    make up     # Start services
@@ -81,9 +84,10 @@ docker-compose down
 
 ## 🔧 Configuration
 
-**Important:** This project uses a **single `.env` file** at the root level for all configuration. 
+**Important:** This project uses a **single `.env` file** at the root level for all configuration.
 
 Create it from the example:
+
 ```bash
 cp .env.example .env
 ```
@@ -127,12 +131,14 @@ See `frontend/README.md` for detailed frontend documentation.
 ## 📦 Services
 
 ### Backend (FastAPI)
+
 - **Framework**: FastAPI
 - **Language**: Python 3.12
 - **Port**: 8000 (configurable via `.env`)
 - **Features**: FHIR integration, medication checking API
 
 ### Frontend (React + Vite)
+
 - **Framework**: React 19
 - **Language**: TypeScript
 - **Port**: 5173 (configurable via `.env`)
@@ -141,6 +147,7 @@ See `frontend/README.md` for detailed frontend documentation.
 ## 🔍 API Documentation
 
 When the backend is running, access interactive API documentation at:
+
 - **Swagger UI**: http://localhost:8000/docs
 - **ReDoc**: http://localhost:8000/redoc
 
@@ -168,6 +175,7 @@ curl http://localhost:8000/api/health
 ### Port Already in Use
 
 Edit `.env` file and change ports:
+
 ```bash
 BACKEND_PORT=8001
 FRONTEND_PORT=3000
@@ -189,12 +197,12 @@ FRONTEND_PORT=3000
 
 All environment variables are documented in `.env.example`. Key variables:
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `BACKEND_PORT` | Backend API port | 8000 |
-| `FRONTEND_PORT` | Frontend dev server port | 5173 |
-| `FHIR_SERVER_URL` | FHIR server endpoint | http://hapi.fhir.org/baseR4 |
-| `LOG_LEVEL` | Logging level | INFO |
+| Variable          | Description              | Default                     |
+| ----------------- | ------------------------ | --------------------------- |
+| `BACKEND_PORT`    | Backend API port         | 8000                        |
+| `FRONTEND_PORT`   | Frontend dev server port | 5173                        |
+| `FHIR_SERVER_URL` | FHIR server endpoint     | http://hapi.fhir.org/baseR4 |
+| `LOG_LEVEL`       | Logging level            | INFO                        |
 
 ## 🤝 Contributing
 
@@ -218,4 +226,3 @@ All environment variables are documented in `.env.example`. Key variables:
 - [Backend Documentation](backend/README.md)
 - [Frontend Documentation](frontend/README.md)
 - [FHIR Documentation](https://www.hl7.org/fhir/)
-

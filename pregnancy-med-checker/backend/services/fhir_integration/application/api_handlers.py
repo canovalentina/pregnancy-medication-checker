@@ -500,15 +500,58 @@ class FHIRAPIHandlers:
             logger.error(f"Failed to delete ingested patients: {e}")
             raise HTTPException(status_code=500, detail=str(e)) from e
 
-    async def get_ingested_patient_ids(self) -> APIResponse:
-        """Get count and list of IDs for all ingested patients."""
-        try:
-            result = await self.client.get_ingested_patient_ids()
+    async def get_ingested_patient_ids(
+        self,
+        stored_ids: list[str] | None = None,
+        fallback_names: list[str] | None = None,
+    ) -> APIResponse:
+        """Get count and list of IDs for demo/assigned patients.
 
+        Does NOT use the ingestion identifier/tag. Uses (1) stored_ids from
+        startup ingest if provided and non-empty, or (2) search by name only
+        (no tag filter) when fallback_names is provided.
+        """
+        try:
+            if stored_ids:
+                return APIResponse(
+                    status="success",
+                    message=f"Found {len(stored_ids)} demo patient(s) (from startup ingest)",
+                    data={"count": len(stored_ids), "patient_ids": stored_ids},
+                )
+            if fallback_names:
+                seen: set[str] = set()
+                for name in fallback_names:
+                    patients = await self.client.search_patients(
+                        name=name,
+                        only_ingested_patients=False,
+                        count=10,
+                    )
+                    for p in patients:
+                        if p.id and p.id not in seen:
+                            seen.add(p.id)
+                    # Some servers match family name better than full name
+                    if not patients and " " in name:
+                        family = name.split()[-1]
+                        if family != name:
+                            patients = await self.client.search_patients(
+                                name=family,
+                                only_ingested_patients=False,
+                                count=10,
+                            )
+                            for p in patients:
+                                if p.id and p.id not in seen:
+                                    seen.add(p.id)
+                if seen:
+                    ids = list(seen)
+                    return APIResponse(
+                        status="success",
+                        message=f"Found {len(ids)} demo patient(s) (by name search)",
+                        data={"count": len(ids), "patient_ids": ids},
+                    )
             return APIResponse(
                 status="success",
-                message=f"Found {result['count']} ingested patient(s)",
-                data=result,
+                message="Found 0 demo patient(s)",
+                data={"count": 0, "patient_ids": []},
             )
         except Exception as e:
             logger.error(f"Failed to get ingested patient IDs: {e}")

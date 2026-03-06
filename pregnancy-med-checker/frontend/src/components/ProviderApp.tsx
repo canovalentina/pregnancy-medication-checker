@@ -3,16 +3,8 @@ import { DrugSearch } from './medications/DrugSearch';
 import { PatientSearch } from './provider/PatientSearch';
 import { PatientList } from './provider/PatientList';
 import { PatientDetail } from './provider/PatientDetail';
-import { getPatientSummary } from '../services/fhirApi';
+import { getPatientSummary, getIngestedPatientIds } from '../services/fhirApi';
 import type { Patient } from '../types/api';
-
-// Assigned patient IDs for this provider
-// These are the patients that are commonly accessed by this provider
-const ASSIGNED_PATIENT_IDS = [
-  '53418821', // Sarah Williams (test patient with pregnancy data and drug interactions)
-  '53418889', // Maria Martinez (patient with pre-term birth history and previous pregnancies)
-  '53418860', // Jennifer Chen (patient with multiple conditions: hypertension, diabetes, asthma, and pregnancy)
-];
 
 export function ProviderApp() {
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
@@ -20,15 +12,38 @@ export function ProviderApp() {
   const [assignedPatients, setAssignedPatients] = useState<Patient[]>([]);
   const [loadingAssigned, setLoadingAssigned] = useState(true);
 
-  // Load assigned patients on mount by fetching their summaries
+  // Load assigned patients from ingested-patients API (dynamic; no hardcoded IDs)
   useEffect(() => {
+    let cancelled = false;
+    let retryCount = 0;
+    const maxRetries = 6;
+    const retryDelayMs = 5000;
+
     const loadAssignedPatients = async () => {
       setLoadingAssigned(true);
       try {
-        const patients: Patient[] = [];
+        const idsResponse = await getIngestedPatientIds();
+        const patientIds: string[] =
+          idsResponse.status === 'success' && idsResponse.data?.patient_ids
+            ? idsResponse.data.patient_ids
+            : [];
 
-        // Fetch each assigned patient by getting their summary (which includes patient info)
-        for (const patientId of ASSIGNED_PATIENT_IDS) {
+        if (cancelled) return;
+
+        if (patientIds.length === 0) {
+          if (retryCount < maxRetries) {
+            retryCount += 1;
+            setTimeout(loadAssignedPatients, retryDelayMs);
+          } else {
+            setAssignedPatients([]);
+            setLoadingAssigned(false);
+          }
+          return;
+        }
+
+        const patients: Patient[] = [];
+        for (const patientId of patientIds) {
+          if (cancelled) break;
           try {
             const summaryResponse = await getPatientSummary(patientId);
             if (
@@ -39,19 +54,24 @@ export function ProviderApp() {
             }
           } catch (error) {
             console.warn(`Failed to load patient ${patientId}:`, error);
-            // Continue loading other patients even if one fails
           }
         }
-
-        setAssignedPatients(patients);
+        if (!cancelled) setAssignedPatients(patients);
       } catch (error) {
         console.error('Failed to load assigned patients:', error);
+        if (!cancelled && retryCount < maxRetries) {
+          retryCount += 1;
+          setTimeout(loadAssignedPatients, retryDelayMs);
+        }
       } finally {
-        setLoadingAssigned(false);
+        if (!cancelled) setLoadingAssigned(false);
       }
     };
 
     loadAssignedPatients();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const handlePatientSelect = (patient: Patient) => {
@@ -95,6 +115,7 @@ export function ProviderApp() {
             compact={true}
             emptyMessage="No assigned patients found."
             loading={loadingAssigned}
+            loadingMessage="Loading patients from server… Demo data may take a moment on first load."
           />
         </div>
 

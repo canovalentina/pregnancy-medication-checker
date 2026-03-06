@@ -17,7 +17,13 @@ RUN uv sync --frozen
 # Copy application code (includes data files)
 # Note: CSV files in services/*/data/ are included unless excluded by .dockerignore
 # The large drugbank_interactions.csv (413MB) will be included if present
+# Synthea test bundles (services/synthea/test/) must be included for INGEST_DEMO_AT_STARTUP on Fly.io and Docker
 COPY backend/ ./
+
+# Ensure synthea test bundles are present (required for demo ingest at startup; .dockerignore must not exclude synthea/test)
+RUN if [ ! -d services/synthea/test ] || [ -z "$(ls -A services/synthea/test/*.json 2>/dev/null)" ]; then \
+        echo "ERROR: services/synthea/test/ missing or has no JSON bundles. Add it to the image (check .dockerignore)."; exit 1; \
+    fi && echo "✓ Synthea test bundles present for INGEST_DEMO_AT_STARTUP"
 
 # Verify critical data files exist and convert CSV to Parquet if needed
 # Parquet format is 10-50x faster, especially on network filesystems like Fly.io
