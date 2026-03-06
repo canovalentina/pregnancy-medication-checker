@@ -8,7 +8,9 @@
         "resourceType": "Patient",
         "id": "00000000-0000-0000-0000-000000000000",
         "meta": {
-          "profile": ["http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"]
+          "profile": [
+            "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
+          ]
         },
         "identifier": [
           {
@@ -46,7 +48,9 @@
         "resourceType": "Condition",
         "id": "00000000-0000-0000-0000-000000000001",
         "meta": {
-          "profile": ["http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition"]
+          "profile": [
+            "http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition"
+          ]
         },
         "clinicalStatus": {
           "coding": [
@@ -102,7 +106,9 @@
         "resourceType": "Medication",
         "id": "00000000-0000-0000-0000-000000000002",
         "meta": {
-          "profile": ["http://hl7.org/fhir/us/core/StructureDefinition/us-core-medication"]
+          "profile": [
+            "http://hl7.org/fhir/us/core/StructureDefinition/us-core-medication"
+          ]
         },
         "code": {
           "coding": [
@@ -127,7 +133,9 @@
         "resourceType": "MedicationRequest",
         "id": "00000000-0000-0000-0000-000000000003",
         "meta": {
-          "profile": ["http://hl7.org/fhir/us/core/StructureDefinition/us-core-medicationrequest"]
+          "profile": [
+            "http://hl7.org/fhir/us/core/StructureDefinition/us-core-medicationrequest"
+          ]
         },
         "status": "active",
         "intent": "order",
@@ -174,7 +182,9 @@
         "resourceType": "MedicationAdministration",
         "id": "00000000-0000-0000-0000-000000000004",
         "meta": {
-          "profile": ["http://hl7.org/fhir/us/core/StructureDefinition/us-core-medicationadministration"]
+          "profile": [
+            "http://hl7.org/fhir/us/core/StructureDefinition/us-core-medicationadministration"
+          ]
         },
         "status": "completed",
         "medicationCodeableConcept": {
@@ -204,7 +214,9 @@
         "resourceType": "Encounter",
         "id": "00000000-0000-0000-0000-000000000005",
         "meta": {
-          "profile": ["http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter"]
+          "profile": [
+            "http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter"
+          ]
         },
         "identifier": [
           {
@@ -261,7 +273,9 @@
         "resourceType": "Procedure",
         "id": "00000000-0000-0000-0000-000000000006",
         "meta": {
-          "profile": ["http://hl7.org/fhir/us/core/StructureDefinition/us-core-procedure"]
+          "profile": [
+            "http://hl7.org/fhir/us/core/StructureDefinition/us-core-procedure"
+          ]
         },
         "status": "completed",
         "code": {
@@ -291,7 +305,9 @@
         "resourceType": "Observation",
         "id": "00000000-0000-0000-0000-000000000007",
         "meta": {
-          "profile": ["http://hl7.org/fhir/us/core/StructureDefinition/us-core-body-height"]
+          "profile": [
+            "http://hl7.org/fhir/us/core/StructureDefinition/us-core-body-height"
+          ]
         },
         "status": "final",
         "category": [

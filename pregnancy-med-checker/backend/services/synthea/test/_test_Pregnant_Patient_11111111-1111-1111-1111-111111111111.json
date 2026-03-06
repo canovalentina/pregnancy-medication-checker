@@ -8,7 +8,9 @@
         "resourceType": "Patient",
         "id": "11111111-1111-1111-1111-111111111111",
         "meta": {
-          "profile": ["http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"]
+          "profile": [
+            "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
+          ]
         },
         "identifier": [
           {
@@ -50,7 +52,9 @@
         "resourceType": "Condition",
         "id": "11111111-1111-1111-1111-111111111112",
         "meta": {
-          "profile": ["http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition"]
+          "profile": [
+            "http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition"
+          ]
         },
         "clinicalStatus": {
           "coding": [
@@ -307,4 +311,3 @@
     }
   ]
 }
-

@@ -26,12 +26,15 @@ export function ProviderApp() {
       setLoadingAssigned(true);
       try {
         const patients: Patient[] = [];
-        
+
         // Fetch each assigned patient by getting their summary (which includes patient info)
         for (const patientId of ASSIGNED_PATIENT_IDS) {
           try {
             const summaryResponse = await getPatientSummary(patientId);
-            if (summaryResponse.status === 'success' && summaryResponse.data.patient) {
+            if (
+              summaryResponse.status === 'success' &&
+              summaryResponse.data.patient
+            ) {
               patients.push(summaryResponse.data.patient);
             }
           } catch (error) {
@@ -39,7 +42,7 @@ export function ProviderApp() {
             // Continue loading other patients even if one fails
           }
         }
-        
+
         setAssignedPatients(patients);
       } catch (error) {
         console.error('Failed to load assigned patients:', error);
@@ -67,8 +70,11 @@ export function ProviderApp() {
     <div className="main-app">
       <div className="main-content">
         <h2>Provider Dashboard</h2>
-        <p>Welcome to the Provider Dashboard. You can search for patients and check medication interactions.</p>
-        
+        <p>
+          Welcome to the Provider Dashboard. You can search for patients and
+          check medication interactions.
+        </p>
+
         {/* Patient Detail - Show prominently at the top when selected */}
         {selectedPatient && (
           <div className="feature-section" style={{ marginBottom: '2rem' }}>
@@ -91,14 +97,12 @@ export function ProviderApp() {
             loading={loadingAssigned}
           />
         </div>
-        
+
         {/* Patient Search - Show when no patient is selected */}
         {!selectedPatient && (
           <>
             <div className="feature-section">
-              <PatientSearch 
-                onSearchResults={handleSearchResults}
-              />
+              <PatientSearch onSearchResults={handleSearchResults} />
             </div>
 
             {searchResults.length > 0 && (
@@ -112,11 +116,11 @@ export function ProviderApp() {
             )}
           </>
         )}
-        
+
         {/* Drug Safety Checker - Always show at the bottom */}
         <div className="feature-section">
           <h3>Drug Safety Checker</h3>
-          <DrugSearch 
+          <DrugSearch
             onDrugSelect={(drugName, rxcui) => {
               console.log('Provider selected drug:', drugName, 'RxCUI:', rxcui);
             }}
@@ -127,4 +131,3 @@ export function ProviderApp() {
     </div>
   );
 }
-

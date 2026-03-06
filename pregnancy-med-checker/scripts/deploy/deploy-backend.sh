@@ -49,14 +49,16 @@ echo "✅ Backend image pushed successfully!"
 echo ""
 echo "🌐 Step 2: Deploying to Fly.io..."
 
-# Check if app exists, create if not
-if ! flyctl apps list | grep -q "pregnancy-backend"; then
+# Ensure app exists; create only if it doesn't (name may already exist in another org)
+if ! flyctl apps list 2>/dev/null | grep -q "pregnancy-backend"; then
     echo "📝 Creating Fly.io app: pregnancy-backend"
-    flyctl apps create pregnancy-backend
+    if ! flyctl apps create pregnancy-backend 2>/dev/null; then
+        echo "   (App name may already exist; proceeding to deploy...)"
+    fi
 fi
 
 # Deploy using fly-backend.toml
-flyctl deploy --config config/fly-backend.toml
+flyctl deploy --config config/fly-backend.toml -a pregnancy-backend
 
 echo ""
 echo "✅ Backend deployment complete!"

@@ -8,7 +8,9 @@
         "resourceType": "Patient",
         "id": "44444444-4444-4444-4444-444444444444",
         "meta": {
-          "profile": ["http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"]
+          "profile": [
+            "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
+          ]
         },
         "identifier": [
           {
@@ -50,7 +52,9 @@
         "resourceType": "Condition",
         "id": "44444444-4444-4444-4444-444444444445",
         "meta": {
-          "profile": ["http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition"]
+          "profile": [
+            "http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition"
+          ]
         },
         "clinicalStatus": {
           "coding": [
@@ -95,7 +99,9 @@
         "resourceType": "Condition",
         "id": "44444444-4444-4444-4444-444444444446",
         "meta": {
-          "profile": ["http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition"]
+          "profile": [
+            "http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition"
+          ]
         },
         "clinicalStatus": {
           "coding": [
@@ -140,7 +146,9 @@
         "resourceType": "Condition",
         "id": "44444444-4444-4444-4444-444444444447",
         "meta": {
-          "profile": ["http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition"]
+          "profile": [
+            "http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition"
+          ]
         },
         "clinicalStatus": {
           "coding": [
@@ -185,7 +193,9 @@
         "resourceType": "Condition",
         "id": "44444444-4444-4444-4444-444444444448",
         "meta": {
-          "profile": ["http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition"]
+          "profile": [
+            "http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition"
+          ]
         },
         "clinicalStatus": {
           "coding": [
@@ -382,4 +392,3 @@
     }
   ]
 }
-
