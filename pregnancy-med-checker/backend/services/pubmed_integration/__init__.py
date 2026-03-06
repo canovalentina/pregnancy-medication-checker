@@ -1,0 +1,1 @@
+"""PubMed integration service."""

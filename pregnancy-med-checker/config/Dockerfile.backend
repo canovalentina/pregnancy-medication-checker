@@ -1,0 +1,46 @@
+FROM python:3.12-slim
+
+# Set working directory
+WORKDIR /app
+
+# Install uv
+RUN pip install uv
+
+# Copy dependency files
+COPY backend/pyproject.toml ./
+COPY backend/uv.lock ./
+COPY backend/README.md ./
+
+# Install dependencies - creates .venv directory
+RUN uv sync --frozen
+
+# Copy application code (includes data files)
+# Note: CSV files in services/*/data/ are included unless excluded by .dockerignore
+# The large drugbank_interactions.csv (413MB) will be included if present
+COPY backend/ ./
+
+# Verify critical data files exist and convert CSV to Parquet if needed
+# Parquet format is 10-50x faster, especially on network filesystems like Fly.io
+RUN if [ -f services/drugbank_integration/data/drugbank_interactions.parquet ]; then \
+        echo "✓ Found drugbank_interactions.parquet (optimized format)"; \
+    elif [ -f services/drugbank_integration/data/drugbank_interactions.csv ]; then \
+        echo "✓ Found drugbank_interactions.csv - Converting to Parquet for faster reads..."; \
+        uv run python scripts/convert_csv_to_parquet.py || echo "  ⚠ Parquet conversion failed, will use CSV"; \
+    elif [ -f services/drug_interaction/data/db_drug_interactions.csv ]; then \
+        echo "✓ Found db_drug_interactions.csv (fallback)"; \
+    else \
+        echo "⚠ WARNING: No drug interaction CSV files found - service may not work correctly"; \
+    fi
+
+# Create logs directory
+RUN mkdir -p logs
+
+# Set default PORT (Fly.io will override this with PORT env var)
+ENV PORT=8000
+
+# Expose port
+EXPOSE 8000
+
+# Run the application with uv run
+# uv run handles the virtual environment correctly
+CMD ["sh", "-c", "uv run uvicorn app.main:app --host 0.0.0.0 --port $PORT"]

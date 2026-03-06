@@ -1,0 +1,2 @@
+1. do we need to use FHIR in the project? If so, could we use it to connect directly with the medicationrequest resource?
+2. Do we need to create a class diagram for the architecture diagram? 

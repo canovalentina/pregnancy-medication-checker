@@ -1,0 +1,140 @@
+{
+  "name": "Lactation_Status",
+  "gmf_version": 1,
+  "remarks": ["Standalone module: Tracks lactation status after live birth. Runs automatically when pregnancy ends and number_of_children increases."],
+  "states": {
+    "Initial": {
+      "type": "Initial",
+      "conditional_transition": [
+        {
+          "condition": {
+            "condition_type": "Gender",
+            "gender": "F"
+          },
+          "transition": "Birth_Guard"
+        },
+        {
+          "transition": "Terminal"
+        }
+      ]
+    },
+    "Birth_Guard": {
+      "type": "Guard",
+      "allow": {
+        "condition_type": "Attribute",
+        "attribute": "number_of_children",
+        "operator": ">",
+        "value": 0
+      },
+      "direct_transition": "Check_Pregnancy_Ended"
+    },
+    "Check_Pregnancy_Ended": {
+      "type": "Simple",
+      "conditional_transition": [
+        {
+          "condition": {
+            "condition_type": "Attribute",
+            "attribute": "pregnant",
+            "operator": "==",
+            "value": false
+          },
+          "transition": "Check_If_New_Birth"
+        },
+        {
+          "transition": "Terminal"
+        }
+      ]
+    },
+    "Check_If_New_Birth": {
+      "type": "Simple",
+      "conditional_transition": [
+        {
+          "condition": {
+            "condition_type": "Attribute",
+            "attribute": "lactation_children_count",
+            "operator": "is nil"
+          },
+          "transition": "Set_Children_Count"
+        },
+        {
+          "condition": {
+            "condition_type": "Attribute",
+            "attribute": "number_of_children",
+            "operator": ">",
+            "value": {
+              "attribute": "lactation_children_count"
+            }
+          },
+          "transition": "Set_Children_Count"
+        },
+        {
+          "transition": "Terminal"
+        }
+      ]
+    },
+    "Set_Children_Count": {
+      "type": "SetAttribute",
+      "attribute": "lactation_children_count",
+      "value": {
+        "attribute": "number_of_children"
+      },
+      "direct_transition": "Set_On"
+    },
+    "Set_On": {
+      "type": "SetAttribute",
+      "attribute": "lactating",
+      "value": true,
+      "direct_transition": "Create_Lactation_Observation_On"
+    },
+    "Create_Lactation_Observation_On": {
+      "type": "Observation",
+      "category": "procedure",
+      "codes": [
+        {
+          "system": "http://snomed.info/sct",
+          "code": "225747004",
+          "display": "Lactation status"
+        }
+      ],
+      "value": {
+        "string": "Lactating"
+      },
+      "direct_transition": "Duration"
+    },
+    "Duration": {
+      "type": "Delay",
+      "range": { "low": 24, "high": 40, "unit": "weeks" },
+      "direct_transition": "Set_Off"
+    },
+    "Set_Off": {
+      "type": "SetAttribute",
+      "attribute": "lactating",
+      "value": false,
+      "direct_transition": "Create_Lactation_Observation_Off"
+    },
+    "Create_Lactation_Observation_Off": {
+      "type": "Observation",
+      "category": "procedure",
+      "codes": [
+        {
+          "system": "http://snomed.info/sct",
+          "code": "225747004",
+          "display": "Lactation status"
+        }
+      ],
+      "value": {
+        "string": "Not lactating"
+      },
+      "direct_transition": "Clear_Trigger"
+    },
+    "Clear_Trigger": {
+      "type": "SetAttribute",
+      "attribute": "lactation_children_count",
+      "value": {
+        "attribute": "number_of_children"
+      },
+      "direct_transition": "Terminal"
+    },
+    "Terminal": { "type": "Terminal" }
+  }
+}

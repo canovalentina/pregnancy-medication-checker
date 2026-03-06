@@ -1,0 +1,36 @@
+# Node
+node_modules
+dist
+# Python
+__pycache__/
+*.pyc
+.venv/
+.ruff_cache/
+.direnv/
+# Env
+.env
+.envrc
+# Mac
+.DS_Store
+# Local files and logs
+local/
+logs/
+
+# Synthea
+**/synthea/output/
+**/synthea/original_modules/
+**/synthea/modules_to_use/
+**/synthea/tmp/
+
+# DrugBank
+**/drugbank_integration/data/
+
+# JAR files
+*.jar
+
+# ZIP files
+*.zip
+
+# Large data files
+*.json.gz
+.vercel

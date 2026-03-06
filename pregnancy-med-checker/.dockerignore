@@ -1,0 +1,89 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+ENV/
+env/
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+*.egg-info/
+dist/
+build/
+
+# Logs
+logs/
+*.log
+
+# Environment files
+.env
+.envrc
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation (not needed in container)
+*.md
+!backend/README.md
+docs/
+
+# Test files (optional - remove if you want tests in container)
+tests/
+backend/tests/
+*.test.py
+*_test.py
+test_*.py
+
+# Large data directories (excluded from .gitignore)
+# Exclude DrugBank raw data and scripts
+**/drugbank_integration/data/DrugBank/
+**/drugbank_integration/scripts/
+**/drugbank_integration/data/*.xml
+**/drugbank_integration/data/*.sdf
+**/drugbank_integration/data/*.fasta
+**/drugbank_integration/data/drugbank_interactions_summary.csv
+**/drugbank_integration/data/drugbank_interactions_sample.csv
+# Note: drugbank_interactions.csv is NOT excluded, so it will be included in Docker if present
+
+# Synthea
+**/synthea/
+
+# JAR and ZIP files
+*.jar
+*.zip
+
+# Node (if any in backend)
+node_modules/
+npm-debug.log*
+
+# Local development files
+local/
+tmp/
+
+# Vercel
+.vercel/
+
+# Docker files themselves
+Dockerfile*
+docker-compose.yml
+.dockerignore
+
+# Makefile (not needed in container)
+Makefile
+

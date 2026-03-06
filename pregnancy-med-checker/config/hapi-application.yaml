@@ -1,0 +1,40 @@
+server:
+  port: ${PORT:8080}
+  address: ${SERVER_ADDRESS:0.0.0.0}
+
+spring:
+  datasource:
+    # For PostgreSQL (Render): Set SPRING_DATASOURCE_URL, SPRING_DATASOURCE_USERNAME, etc.
+    # Format: jdbc:postgresql://host:port/database
+    # For H2 (local testing): Don't set SPRING_DATASOURCE_URL, will use embedded database
+    url: ${SPRING_DATASOURCE_URL:jdbc:h2:file:/data/hapi/fhirDB;AUTO_SERVER=TRUE}
+    username: ${SPRING_DATASOURCE_USERNAME:sa}
+    password: ${SPRING_DATASOURCE_PASSWORD:}
+    driverClassName: ${SPRING_DATASOURCE_DRIVER_CLASS_NAME:org.h2.Driver}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      # Use PostgreSQL dialect if PGHOST is set, otherwise use H2
+      hibernate.dialect: ${SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT:ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect}
+      hibernate.search.enabled: ${SPRING_JPA_PROPERTIES_HIBERNATE_SEARCH_ENABLED:false}
+
+hapi:
+  fhir:
+    server:
+      path: /fhir
+    tester:
+      home:
+        name: Pregnancy Med Checker FHIR Server
+        server_address: ${HAPI_FHIR_BASE_URL:http://localhost:8080/fhir}
+    validation:
+      requests_enabled: true
+      responses_enabled: false
+    narrative_enabled: true
+    cors:
+      allow_Credentials: true
+      allowed_origin:
+        - http://localhost:5173
+        - ${VERCEL_APP_URL:https://pregnancy-med-checker.vercel.app}
+        - ${CUSTOM_APP_URL:https://www.pregsafe.org}

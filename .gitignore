@@ -1,0 +1,12 @@
+# macOS
+.DS_Store
+
+# Proxy
+no-proxy.sh
+
+tmp/*
+
+*.jar
+
+
+.vercel

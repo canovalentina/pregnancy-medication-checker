@@ -1,0 +1,330 @@
+{
+  "name": "Pregnancy_Exposures",
+  "gmf_version": 1,
+  "remarks": ["Standalone module: Generates trimester-timed medication exposures during pregnancy. Runs automatically when pregnant attribute is true."],
+  "states": {
+    "Initial": {
+      "type": "Initial",
+      "conditional_transition": [
+        {
+          "condition": {
+            "condition_type": "Gender",
+            "gender": "F"
+          },
+          "transition": "Pregnancy_Guard"
+        },
+        {
+          "transition": "Terminal"
+        }
+      ]
+    },
+    "Pregnancy_Guard": {
+      "type": "Guard",
+      "allow": {
+        "condition_type": "Attribute",
+        "attribute": "pregnant",
+        "operator": "==",
+        "value": true
+      },
+      "direct_transition": "Init_Array"
+    },
+    "Init_Array": {
+      "type": "SetAttribute",
+      "attribute": "pregnancy_exposures",
+      "value": [],
+      "direct_transition": "T1"
+    },
+    "T1": {
+      "type": "Simple",
+      "conditional_transition": [
+        {
+          "condition": {
+            "condition_type": "Attribute",
+            "attribute": "pregnant",
+            "operator": "==",
+            "value": true
+          },
+          "transition": "T1_Choose"
+        },
+        { "transition": "Terminal" }
+      ]
+    },
+    "T1_Choose": {
+      "type": "Simple",
+      "distributed_transition": [
+        { "distribution": 0.6, "transition": "T1_None" },
+        { "distribution": 0.35, "transition": "Add_T1_One" },
+        { "distribution": 0.05, "transition": "Add_T1_Two" }
+      ]
+    },
+    "Add_T1_One": {
+      "type": "SetAttribute",
+      "attribute": "pregnancy_exposures",
+      "value": {
+        "append": {
+          "name": "Prenatal multivitamin",
+          "code_system": "RxNorm",
+          "code": "316152",
+          "trimester": "T1",
+          "intent": "supplement"
+        }
+      },
+      "direct_transition": "Create_T1_One_Medication"
+    },
+    "Create_T1_One_Medication": {
+      "type": "MedicationOrder",
+      "codes": [
+        {
+          "system": "RxNorm",
+          "code": 316152,
+          "display": "Prenatal multivitamin"
+        }
+      ],
+      "direct_transition": "T1_Maybe_Alt"
+    },
+    "Add_T1_Two": { "type": "Simple", "direct_transition": "Add_T1_One" },
+    "T1_Maybe_Alt": {
+      "type": "Simple",
+      "distributed_transition": [
+        { "distribution": 0.8, "transition": "T1_None" },
+        { "distribution": 0.2, "transition": "Add_T1_Alt" }
+      ]
+    },
+    "Add_T1_Alt": {
+      "type": "SetAttribute",
+      "attribute": "pregnancy_exposures",
+      "value": {
+        "append": {
+          "name": "Ibuprofen",
+          "code_system": "RxNorm",
+          "code": "5640",
+          "trimester": "T1",
+          "intent": "OTC analgesic"
+        }
+      },
+      "direct_transition": "Create_T1_Alt_Medication"
+    },
+    "Create_T1_Alt_Medication": {
+      "type": "MedicationOrder",
+      "codes": [
+        {
+          "system": "RxNorm",
+          "code": 5640,
+          "display": "Ibuprofen"
+        }
+      ],
+      "direct_transition": "T1_None"
+    },
+    "T1_None": {
+      "type": "Delay",
+      "exact": { "quantity": 12, "unit": "weeks" },
+      "direct_transition": "T2"
+    },
+
+    "T2": {
+      "type": "Simple",
+      "conditional_transition": [
+        {
+          "condition": {
+            "condition_type": "Attribute",
+            "attribute": "pregnant",
+            "operator": "==",
+            "value": true
+          },
+          "transition": "T2_Choose"
+        },
+        { "transition": "Terminal" }
+      ]
+    },
+    "T2_Choose": {
+      "type": "Simple",
+      "distributed_transition": [
+        { "distribution": 0.55, "transition": "T2_None" },
+        { "distribution": 0.35, "transition": "Add_T2_One" },
+        { "distribution": 0.1, "transition": "Add_T2_Two" }
+      ]
+    },
+    "Add_T2_One": {
+      "type": "SetAttribute",
+      "attribute": "pregnancy_exposures",
+      "value": {
+        "append": {
+          "name": "Ondansetron",
+          "code_system": "RxNorm",
+          "code": "197361",
+          "trimester": "T2",
+          "intent": "antiemetic"
+        }
+      },
+      "direct_transition": "Create_T2_One_Medication"
+    },
+    "Create_T2_One_Medication": {
+      "type": "MedicationOrder",
+      "codes": [
+        {
+          "system": "RxNorm",
+          "code": 197361,
+          "display": "Ondansetron"
+        }
+      ],
+      "direct_transition": "T2_Maybe_Alt"
+    },
+    "Add_T2_Two": { "type": "Simple", "direct_transition": "Add_T2_One" },
+    "T2_Maybe_Alt": {
+      "type": "Simple",
+      "distributed_transition": [
+        { "distribution": 0.75, "transition": "T2_None" },
+        { "distribution": 0.25, "transition": "Add_T2_Alt" }
+      ]
+    },
+    "Add_T2_Alt": {
+      "type": "SetAttribute",
+      "attribute": "pregnancy_exposures",
+      "value": {
+        "append": {
+          "name": "Nitrofurantoin",
+          "code_system": "RxNorm",
+          "code": "7454",
+          "trimester": "T2",
+          "intent": "UTI antibiotic"
+        }
+      },
+      "direct_transition": "Create_T2_Alt_Medication"
+    },
+    "Create_T2_Alt_Medication": {
+      "type": "MedicationOrder",
+      "codes": [
+        {
+          "system": "RxNorm",
+          "code": 7454,
+          "display": "Nitrofurantoin"
+        }
+      ],
+      "direct_transition": "T2_None"
+    },
+    "T2_None": {
+      "type": "Delay",
+      "exact": { "quantity": 12, "unit": "weeks" },
+      "direct_transition": "T3"
+    },
+
+    "T3": {
+      "type": "Simple",
+      "conditional_transition": [
+        {
+          "condition": {
+            "condition_type": "Attribute",
+            "attribute": "pregnant",
+            "operator": "==",
+            "value": true
+          },
+          "transition": "T3_Choose"
+        },
+        { "transition": "Terminal" }
+      ]
+    },
+    "T3_Choose": {
+      "type": "Simple",
+      "distributed_transition": [
+        { "distribution": 0.55, "transition": "End_Check" },
+        { "distribution": 0.35, "transition": "Add_T3_One" },
+        { "distribution": 0.1, "transition": "Add_T3_Two" }
+      ]
+    },
+    "Add_T3_One": {
+      "type": "SetAttribute",
+      "attribute": "pregnancy_exposures",
+      "value": {
+        "append": {
+          "name": "Low-dose aspirin (81 mg)",
+          "code_system": "RxNorm",
+          "code": "243670",
+          "trimester": "T3",
+          "intent": "preeclampsia prophylaxis"
+        }
+      },
+      "direct_transition": "Create_T3_One_Medication"
+    },
+    "Create_T3_One_Medication": {
+      "type": "MedicationOrder",
+      "codes": [
+        {
+          "system": "RxNorm",
+          "code": 243670,
+          "display": "Low-dose aspirin (81 mg)"
+        }
+      ],
+      "direct_transition": "T3_Maybe_Alt"
+    },
+    "Add_T3_Two": { "type": "Simple", "direct_transition": "Add_T3_One" },
+    "T3_Maybe_Alt": {
+      "type": "Simple",
+      "distributed_transition": [
+        { "distribution": 0.7, "transition": "End_Check" },
+        { "distribution": 0.3, "transition": "Add_T3_Alt" }
+      ]
+    },
+    "Add_T3_Alt": {
+      "type": "SetAttribute",
+      "attribute": "pregnancy_exposures",
+      "value": {
+        "append": {
+          "name": "Calcium supplement",
+          "code_system": "RxNorm",
+          "code": "198440",
+          "trimester": "T3",
+          "intent": "supplement"
+        }
+      },
+      "direct_transition": "Create_T3_Alt_Medication"
+    },
+    "Create_T3_Alt_Medication": {
+      "type": "MedicationOrder",
+      "codes": [
+        {
+          "system": "RxNorm",
+          "code": 198440,
+          "display": "Calcium supplement"
+        }
+      ],
+      "direct_transition": "End_Check"
+    },
+    "End_Check": {
+      "type": "Simple",
+      "conditional_transition": [
+        {
+          "condition": {
+            "condition_type": "Attribute",
+            "attribute": "pregnant",
+            "operator": "==",
+            "value": true
+          },
+          "transition": "Counseling_Check"
+        },
+        { "transition": "Terminal" }
+      ]
+    },
+    "Counseling_Check": {
+      "type": "Simple",
+      "distributed_transition": [
+        { "distribution": 0.85, "transition": "Terminal" },
+        { "distribution": 0.15, "transition": "Add_Counsel" }
+      ]
+    },
+    "Add_Counsel": {
+      "type": "SetAttribute",
+      "attribute": "pregnancy_exposures",
+      "value": {
+        "append": {
+          "name": "Ibuprofen",
+          "code_system": "RxNorm",
+          "code": "5640",
+          "trimester": "T3",
+          "intent": "counseled to discontinue"
+        }
+      },
+      "direct_transition": "Terminal"
+    },
+    "Terminal": { "type": "Terminal" }
+  }
+}

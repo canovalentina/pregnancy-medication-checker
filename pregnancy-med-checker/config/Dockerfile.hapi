@@ -1,0 +1,8 @@
+FROM hapiproject/hapi:latest
+
+# Copy custom configuration
+# Spring Boot automatically searches for application.yaml in /app/config/
+COPY config/hapi-application.yaml /app/config/application.yaml
+
+# Expose port - Render auto-detects from EXPOSE directive
+EXPOSE 8080

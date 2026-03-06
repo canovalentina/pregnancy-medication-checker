@@ -1,0 +1,71 @@
+# Fly.io configuration for HAPI FHIR Server
+app = "pregnancy-hapi-fhir"
+primary_region = "iad"  # US East (change if needed)
+
+[build]
+  image = "canovalentina/pregnancy-hapi-fhir:latest"
+
+[env]
+  PORT = "8080"
+  SERVER_ADDRESS = "0.0.0.0"
+  # HAPI FHIR base URL (for tester UI)
+  HAPI_FHIR_BASE_URL = "https://pregnancy-hapi-fhir.fly.dev/fhir"
+  # CORS origins
+  VERCEL_APP_URL = "https://pregnancy-med-checker.vercel.app"
+  CUSTOM_APP_URL = "https://www.pregsafe.org"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = false  # Keep always running
+  auto_start_machines = true
+  min_machines_running = 2
+  
+  [http_service.concurrency]
+    type = "requests"
+    soft_limit = 200
+    hard_limit = 250
+
+[[services]]
+  protocol = "tcp"
+  internal_port = 8080
+
+  [[services.ports]]
+    port = 80
+    handlers = ["http"]
+
+  [[services.ports]]
+    port = 443
+    handlers = ["tls", "http"]
+
+  [services.concurrency]
+    type = "connections"
+    hard_limit = 25
+    soft_limit = 20
+
+  [[services.tcp_checks]]
+    grace_period = "30s"
+    interval = "15s"
+    restart_limit = 0
+    timeout = "10s"
+
+  [[services.http_checks]]
+    interval = "30s"
+    grace_period = "30s"
+    method = "get"
+    path = "/fhir/metadata"
+    protocol = "http"
+    timeout = "10s"
+    tls_skip_verify = false
+
+# Memory and CPU allocation
+[vm]
+  cpu_kind = "shared"
+  cpus = 1
+  memory_mb = 2048  # 2GB RAM - enough for HAPI FHIR
+
+# Volume for H2 database persistence (optional, can upgrade to PostgreSQL later)
+[[mounts]]
+  source = "hapi_data"
+  destination = "/data/hapi"
+

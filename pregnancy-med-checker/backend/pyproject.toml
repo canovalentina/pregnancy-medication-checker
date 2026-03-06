@@ -1,0 +1,77 @@
+[project]
+name = "pregnancy-med-checker"
+version = "0.1.0"
+description = "Pregnancy Medication Checker API"
+authors = [
+    {name = "Valentina Cano Arcay", email = "varcay3@gatech.edu"},
+    {name = "Lana P Kareem", email = "lkareem6@gatech.edu"},
+    {name = "Faezeh Goli", email = "faezeh@gatech.edu"}
+]
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115.5",
+    "uvicorn[standard]>=0.32.0",
+    "python-dotenv>=1.0.1",
+    "requests>=2.31.0",
+    "loguru>=0.7.0",
+    "polars>=1.0.0",
+    "pydantic>=2.0.0",
+    "httpx>=0.24.0",
+    "python-jose[cryptography]>=3.3.0",
+    "python-multipart>=0.0.6",
+    "fhirpy>=2.2.0",
+    "cachetools>=5.3.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0",
+    "black>=23.0.0",
+    "isort>=5.12.0",
+    "mypy>=1.0.0",
+    "ruff>=0.1.0",
+    "jupyter>=1.0.0",
+    "ipykernel>=6.0.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["app", "fhir_integration"]
+
+[tool.black]
+line-length = 88
+target-version = ['py312']
+
+[tool.isort]
+profile = "black"
+line_length = 88
+
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+
+[tool.ruff]
+target-version = "py312"
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "C90", "I", "N", "UP", "B", "A", "S", "BLE", "FBT", "B", "A", "COM", "C4", "DTZ", "T10", "EM", "EXE", "FA", "ISC", "ICN", "G", "INP", "PIE", "T20", "PYI", "PT", "Q", "RSE", "RET", "SLF", "SLOT", "SIM", "TID", "TCH", "INT", "ARG", "PTH", "TD", "FIX", "ERA", "PD", "PGH", "PL", "TRY", "FLY", "NPY", "AIR", "PERF", "FURB", "LOG", "RUF"]
+ignore = ["E501", "E203", "T201", "BLE001", "PERF203", "TRY300", "RET505", "F541", "INP001", "TID252", "PTH123", "UP015", "W292", "COM812", "ARG002", "SIM108", "PLR0913", "C901", "PLR0912", "PLR0915", "TC003", "TC001", "FBT001", "FBT002", "FBT003", "PLW2901", "PLR0911", "RUF012", "TRY003", "EM102", "SLF001", "B008", "S105", "S106", "S101", "RET504", "F841", "B904", "TRY301", "S110", "RUF010", "PLR2004"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-v --tb=short -s --log-cli-level=INFO -ra"
+asyncio_mode = "auto"
+log_cli = true
+log_cli_level = "INFO"
+log_cli_format = "%(asctime)s [%(levelname)8s] %(message)s"
+log_cli_date_format = "%Y-%m-%d %H:%M:%S"
+# To see debug logs, run: pytest --log-cli-level=DEBUG

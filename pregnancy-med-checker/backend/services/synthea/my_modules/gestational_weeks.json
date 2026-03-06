@@ -1,0 +1,95 @@
+{
+  "name": "Gestational_Weeks",
+  "gmf_version": 1,
+  "remarks": ["Standalone module: Tracks gestational age weekly during pregnancy. Runs automatically when pregnant attribute is true."],
+  "states": {
+    "Initial": {
+      "type": "Initial",
+      "conditional_transition": [
+        {
+          "condition": {
+            "condition_type": "Gender",
+            "gender": "F"
+          },
+          "transition": "Pregnancy_Guard"
+        },
+        {
+          "transition": "Terminal"
+        }
+      ]
+    },
+    "Pregnancy_Guard": {
+      "type": "Guard",
+      "allow": {
+        "condition_type": "Attribute",
+        "attribute": "pregnant",
+        "operator": "==",
+        "value": true
+      },
+      "direct_transition": "Start_GW"
+    },
+    "Start_GW": {
+      "type": "SetAttribute",
+      "attribute": "gestational_weeks",
+      "value": 0,
+      "direct_transition": "Loop_Check"
+    },
+    "Loop_Check": {
+      "type": "Simple",
+      "conditional_transition": [
+        {
+          "condition": {
+            "condition_type": "Attribute",
+            "attribute": "pregnant",
+            "operator": "==",
+            "value": true
+          },
+          "transition": "Tick"
+        },
+        { "transition": "Capture_And_End" }
+      ]
+    },
+    "Tick": {
+      "type": "Counter",
+      "action": "increment",
+      "attribute": "gestational_weeks",
+      "direct_transition": "Create_Gestational_Age_Observation"
+    },
+    "Create_Gestational_Age_Observation": {
+      "type": "Observation",
+      "category": "procedure",
+      "codes": [
+        {
+          "system": "http://loinc.org",
+          "code": "11778-8",
+          "display": "Gestational age"
+        }
+      ],
+      "value": {
+        "quantity": {
+          "attribute": "gestational_weeks"
+        },
+        "unit": "weeks"
+      },
+      "direct_transition": "Wait_Week"
+    },
+    "Wait_Week": {
+      "type": "Delay",
+      "exact": { "quantity": 1, "unit": "weeks" },
+      "direct_transition": "Loop_Check"
+    },
+    "Capture_And_End": {
+      "type": "SetAttribute",
+      "attribute": "gestational_weeks_at_outcome",
+      "value": { "attribute": "gestational_weeks" },
+      "direct_transition": "Clear_GW"
+    },
+    "Clear_GW": {
+      "type": "SetAttribute",
+      "attribute": "gestational_weeks",
+      "value": null,
+      "direct_transition": "Terminal"
+    },
+    "Terminal": { "type": "Terminal" }
+  }
+}

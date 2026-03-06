@@ -1,0 +1,26 @@
+{
+  "53418821": [
+    {
+      "id": "msg_2025-11-25T18-02-17-410266+00-00",
+      "patient_id": "53418821",
+      "sender_username": "patient",
+      "sender_role": "patient",
+      "sender_name": "Sarah Williams",
+      "content": "Hi Dr. Johnson, I was wondering if I Grapefruit will interact with the prenatal vitamin I am taking?",
+      "created_at": "2025-11-25T18:02:17.410275+00:00",
+      "read": true,
+      "read_at": "2025-11-25T18:02:37.730238+00:00"
+    },
+    {
+      "id": "msg_2025-11-25T18-03-40-085113+00-00",
+      "patient_id": "53418821",
+      "sender_username": "provider",
+      "sender_role": "provider",
+      "sender_name": "Dr. Sarah Johnson",
+      "content": "Hi Sarah, no it does not. You are okay to eat Grapefruit will taking the prenatal vitamin.",
+      "created_at": "2025-11-25T18:03:40.085130+00:00",
+      "read": true,
+      "read_at": "2025-11-27T03:25:51.670151+00:00"
+    }
+  ]
+}
