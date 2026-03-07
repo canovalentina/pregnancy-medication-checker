@@ -22,7 +22,16 @@ export function LoginForm({ onLogin }: LoginFormProps) {
       onLogin?.(response.user);
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login failed');
+      const message = err instanceof Error ? err.message : 'Login failed';
+      const isNetworkError =
+        err instanceof TypeError ||
+        message.toLowerCase().includes('failed to fetch') ||
+        message.toLowerCase().includes('network');
+      setError(
+        isNetworkError
+          ? 'Server may be starting up. Please wait a moment and try again.'
+          : message,
+      );
     } finally {
       setLoading(false);
     }
@@ -37,7 +46,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
           id="username"
           type="text"
           value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          onChange={e => setUsername(e.target.value)}
           placeholder="Enter your username"
           required
           disabled={loading}
@@ -49,15 +58,15 @@ export function LoginForm({ onLogin }: LoginFormProps) {
           id="password"
           type="password"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={e => setPassword(e.target.value)}
           placeholder="Enter your password"
           required
           disabled={loading}
         />
       </div>
       {error && <div className="error-message">{error}</div>}
-      <button 
-        type="submit" 
+      <button
+        type="submit"
         className="login-button"
         disabled={loading || !username || !password}
       >
@@ -66,4 +75,3 @@ export function LoginForm({ onLogin }: LoginFormProps) {
     </form>
   );
 }
-

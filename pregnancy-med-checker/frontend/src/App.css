@@ -191,7 +191,7 @@
 }
 
 .feature-section li::before {
-  content: "✓";
+  content: '✓';
   position: absolute;
   left: 0;
   color: #667eea;
@@ -243,6 +243,62 @@
   justify-content: center;
   align-items: flex-start;
   width: 100%;
+}
+
+.backend-wait {
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 3rem;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  max-width: 400px;
+}
+
+.backend-wait .loading-spinner-large {
+  width: 60px;
+  height: 60px;
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.backend-wait-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.backend-wait-hint {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #666;
+  text-align: center;
+}
+
+.backend-slow-hint {
+  margin: 0 0 1rem 0;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.95);
+  color: #666;
+  font-size: 0.9rem;
+  border-radius: 8px;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
 }
 
 /* Login Form Styles */
@@ -305,7 +361,9 @@
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
   margin-top: 0.5rem;
 }
 
@@ -433,7 +491,8 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -471,7 +530,6 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
-
   .app-title {
     font-size: 2.5rem;
   }
