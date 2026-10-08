@@ -14,7 +14,7 @@ DEFAULT_SYNTHEA_DATA_PATH = BACKEND_DIR / "services" / "synthea" / "output" / "f
 DEFAULT_TEST_DATA_PATH = BACKEND_DIR / "services" / "synthea" / "test"
 
 # Default FHIR server URL
-DEFAULT_FHIR_SERVER_URL = os.getenv("FHIR_SERVER_URL", "http://hapi.fhir.org/baseR4")
+DEFAULT_FHIR_SERVER_URL = os.getenv("FHIR_SERVER_URL", "https://hapi.fhir.org/baseR4")
 
 # Custom identifier system for tracking ingested patients
 # This allows identifying patients ingested by this application on public FHIR servers

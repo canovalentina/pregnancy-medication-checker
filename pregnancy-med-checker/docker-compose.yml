@@ -37,7 +37,7 @@ services:
       - APP_NAME=${APP_NAME:-Pregnancy Medication Checker API}
       - API_PREFIX=${API_PREFIX:-/api}
       - ENABLE_CORS_ORIGINS=${ENABLE_CORS_ORIGINS}
-      - FHIR_SERVER_URL=${FHIR_SERVER_URL:-http://hapi.fhir.org/baseR4}
+      - FHIR_SERVER_URL=${FHIR_SERVER_URL:-https://hapi.fhir.org/baseR4}
       - FHIR_APP_ID=${FHIR_APP_ID:-pregnancy-med-checker}
       - FHIR_TIMEOUT=${FHIR_TIMEOUT:-30}
       - LOG_LEVEL=${LOG_LEVEL:-INFO}

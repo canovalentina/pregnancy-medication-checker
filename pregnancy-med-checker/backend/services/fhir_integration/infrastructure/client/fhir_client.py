@@ -4,11 +4,13 @@ from __future__ import annotations
 
 import asyncio
 import os
+import re
 import ssl
 from datetime import UTC, datetime
 from typing import Any
 
 import aiohttp
+import certifi
 import httpx
 from fhirpy import AsyncFHIRClient  # type: ignore[import-untyped]
 from fhirpy.base.exceptions import OperationOutcome  # type: ignore[import-untyped]
@@ -70,21 +72,21 @@ class FHIRClientService:
             "timeout": aiohttp.ClientTimeout(total=self.timeout),
         }
 
+        # SSL context for every aiohttp request (fhirpy passes aiohttp_config as
+        # request kwargs). Use certifi's CA bundle: uv/python.org Python builds
+        # on macOS don't read the system keychain, which causes
+        # CERTIFICATE_VERIFY_FAILED against https FHIR servers.
+        if self.verify_ssl:
+            self._ssl_context: ssl.SSLContext = ssl.create_default_context(
+                cafile=certifi.where()
+            )
+        else:
+            self._ssl_context = ssl.create_default_context()
+            self._ssl_context.check_hostname = False
+            self._ssl_context.verify_mode = ssl.CERT_NONE
+        aiohttp_config["ssl"] = self._ssl_context
+
         try:
-            # Check if a custom HAPI FHIR instance is used
-            if "/fhir" in self.base_url.lower():
-                if not self.verify_ssl:
-                    ssl_context = ssl.create_default_context()
-                    ssl_context.check_hostname = False
-                    ssl_context.verify_mode = ssl.CERT_NONE
-                else:
-                    ssl_context = True
-
-                # Add connector to aiohttp_config
-                aiohttp_config.update(
-                    {"connector": aiohttp.TCPConnector(ssl=ssl_context)}
-                )
-
             self.client = AsyncFHIRClient(
                 url=self.base_url,
                 authorization=authorization,
@@ -103,7 +105,7 @@ class FHIRClientService:
         """Retrieve CapabilityStatement to verify connectivity."""
         try:
             async with httpx.AsyncClient(
-                timeout=self.timeout, verify=self.verify_ssl
+                timeout=self.timeout, verify=self.verify_ssl, follow_redirects=True
             ) as c:
                 r = await c.get(f"{self.base_url}/metadata?_format=json")
                 r.raise_for_status()
@@ -127,6 +129,29 @@ class FHIRClientService:
                 server_name=None,
             )
 
+    @staticmethod
+    def _existing_id_from_duplicate_error(
+        error: Exception, resource_type: ResourceType
+    ) -> str | None:
+        """Return the existing resource id from a HAPI-2840 duplicate error, if any."""
+        match = re.search(
+            r"HAPI-2840:.*?duplicating existing resource: (\w+)/([A-Za-z0-9\-.]+)",
+            str(error),
+        )
+        if match and match.group(1) == resource_type.value:
+            return match.group(2)
+        return None
+
+    @staticmethod
+    def _summarize_outcome(error: Exception) -> str:
+        """One-line summary of an OperationOutcome's error-level diagnostics."""
+        issues = re.findall(
+            r'"severity":\s*"(?:error|fatal)".*?"diagnostics":\s*"([^"]+)"',
+            str(error),
+            flags=re.DOTALL,
+        )
+        return "; ".join(dict.fromkeys(issues)) or str(error)[:200]
+
     async def ingest_resource(
         self,
         resource_type: ResourceType,
@@ -149,9 +174,9 @@ class FHIRClientService:
                             "but continuing with resource creation"
                         )
                 except OperationOutcome as e:
-                    logger.warning(
-                        f"Resource {resource_type.value} validation failed: {e}. "
-                        "Continuing with resource creation (validation is advisory)"
+                    logger.debug(
+                        f"Resource {resource_type.value} validation issues (advisory, "
+                        f"continuing with creation): {self._summarize_outcome(e)}"
                     )
                 except Exception as e:
                     logger.warning(
@@ -159,7 +184,36 @@ class FHIRClientService:
                         "Continuing with resource creation"
                     )
 
-            await resource.save()
+            # Save via the client so we can inspect the raw server response.
+            # Guard against silent redirects: if the server redirects the POST
+            # (e.g. http -> https), aiohttp re-sends it as a GET and we get back a
+            # search Bundle instead of the created resource. fhirpy's
+            # resource.save() would hide that by re-labelling the Bundle with the
+            # original resourceType, so we check the raw response and fail loudly.
+            try:
+                response_data = await self.client.save(resource, _as_dict=True)
+            except Exception as save_error:
+                # HAPI rejects exact duplicates (HAPI-2840) and tells us the id of
+                # the existing resource. Reuse it so ingestion is idempotent.
+                existing_id = self._existing_id_from_duplicate_error(
+                    save_error, resource_type
+                )
+                if existing_id is None:
+                    raise
+                logger.info(
+                    f"{resource_type.value} already exists on server, "
+                    f"reusing {resource_type.value}/{existing_id}"
+                )
+                return existing_id
+            returned_type = (response_data or {}).get("resourceType")
+            if returned_type and returned_type != resource_type.value:
+                raise RuntimeError(
+                    f"Server returned {returned_type} instead of {resource_type.value} "
+                    f"on create. Check FHIR_SERVER_URL ({self.base_url}); "
+                    "an http->https redirect turns POST into GET."
+                )
+            if response_data:
+                resource = self.client.resource(resource_type.value, **response_data)
             # Access resource ID
             rid = resource.get("id") or getattr(resource, "id", None)
             logger.info(f"Created {resource_type.value}: {rid}")
@@ -207,9 +261,9 @@ class FHIRClientService:
                             "but continuing with resource update"
                         )
                 except OperationOutcome as e:
-                    logger.warning(
-                        f"Resource {resource_type.value} validation failed: {e}. "
-                        "Continuing with resource update (validation is advisory)"
+                    logger.debug(
+                        f"Resource {resource_type.value} validation issues (advisory, "
+                        f"continuing with update): {self._summarize_outcome(e)}"
                     )
                 except Exception as e:
                     logger.warning(
@@ -302,7 +356,9 @@ class FHIRClientService:
                 async with aiohttp.ClientSession(  # noqa: SIM117
                     timeout=aiohttp.ClientTimeout(total=self.timeout)
                 ) as session:
-                    async with session.delete(url, headers=headers) as resp:
+                    async with session.delete(
+                        url, headers=headers, ssl=self._ssl_context
+                    ) as resp:
                         # HAPI returns 200/204 on success
                         if resp.status in (200, 204):
                             logger.info(

@@ -201,7 +201,7 @@ All environment variables are documented in `.env.example`. Key variables:
 | ----------------- | ------------------------ | --------------------------- |
 | `BACKEND_PORT`    | Backend API port         | 8000                        |
 | `FRONTEND_PORT`   | Frontend dev server port | 5173                        |
-| `FHIR_SERVER_URL` | FHIR server endpoint     | http://hapi.fhir.org/baseR4 |
+| `FHIR_SERVER_URL` | FHIR server endpoint     | https://hapi.fhir.org/baseR4 |
 | `LOG_LEVEL`       | Logging level            | INFO                        |
 
 ## 🤝 Contributing

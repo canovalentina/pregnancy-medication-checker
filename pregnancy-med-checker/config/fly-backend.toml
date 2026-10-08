@@ -12,7 +12,7 @@ primary_region = "iad"  # US East (same region as HAPI FHIR)
   FHIR_APP_ID = "pregnancy-med-checker"
   FHIR_TIMEOUT = "30"
   LOG_LEVEL = "INFO"
-  FHIR_SERVER_URL = "http://hapi.fhir.org/baseR4"
+  FHIR_SERVER_URL = "https://hapi.fhir.org/baseR4"
   ENABLE_CORS_ORIGINS = "http://localhost:5173,https://pregnancy-med-checker.vercel.app,https://www.pregsafe.org"
   # Set to "true" to ingest demo (test) patients from synthea/test at startup (skips if 3+ already ingested)
   INGEST_DEMO_AT_STARTUP = "true"

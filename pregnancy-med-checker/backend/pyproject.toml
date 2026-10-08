@@ -22,6 +22,7 @@ dependencies = [
     "python-multipart>=0.0.6",
     "fhirpy>=2.2.0",
     "cachetools>=5.3.0",
+    "certifi>=2024.0.0",
 ]
 
 [project.optional-dependencies]

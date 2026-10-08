@@ -87,7 +87,7 @@ The backend is configured with these environment variables (in `config/fly-backe
 - `PORT=8000`
 - `APP_NAME="Pregnancy Medication Checker API"`
 - `API_PREFIX="/api"`
-- `FHIR_SERVER_URL="http://hapi.fhir.org/baseR4"`
+- `FHIR_SERVER_URL="https://hapi.fhir.org/baseR4"`
 - `FHIR_APP_ID="pregnancy-med-checker"`
 - `FHIR_TIMEOUT="30"`
 - `LOG_LEVEL="INFO"`
@@ -97,7 +97,7 @@ The backend is configured with these environment variables (in `config/fly-backe
 
 ```bash
 # Update FHIR server URL
-flyctl secrets set FHIR_SERVER_URL="http://hapi.fhir.org/baseR4" -a pregnancy-backend
+flyctl secrets set FHIR_SERVER_URL="https://hapi.fhir.org/baseR4" -a pregnancy-backend
 
 # Update CORS origins
 flyctl secrets set ENABLE_CORS_ORIGINS="http://localhost:5173,https://pregnancy-med-checker.vercel.app,https://www.pregsafe.org" -a pregnancy-backend
@@ -125,7 +125,7 @@ Expected response:
 
 ### 2. Test FHIR Connection
 ```bash
-curl -s http://hapi.fhir.org/baseR4/metadata
+curl -s https://hapi.fhir.org/baseR4/metadata
 ```
 
 ### 3. Test from Frontend
@@ -156,7 +156,7 @@ flyctl secrets set ENABLE_CORS_ORIGINS="http://localhost:5173,https://your-verce
 ### Can't connect to HAPI FHIR
 ```bash
 # Verify HAPI FHIR is running
-curl -s http://hapi.fhir.org/baseR4/metadata
+curl -s https://hapi.fhir.org/baseR4/metadata
 
 # Update backend's FHIR server URL
 flyctl secrets set FHIR_SERVER_URL="https://pregnancy-hapi-fhir.fly.dev/fhir" -a pregnancy-backend
